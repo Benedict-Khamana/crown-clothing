@@ -1,6 +1,6 @@
 import React from 'react';
 import MenuItem from '../menu-item/menu-item.component';
-import SECTIONS from './directory.data';
+import SECTIONS_DATA from './directory.data';
 
 import './directory.styles.scss';
 
@@ -9,7 +9,7 @@ class Directory extends React.Component {
     super();
 
     this.state = {
-      sections: SECTIONS,
+      sections: SECTIONS_DATA,
     };
   }
 
