@@ -9,3 +9,7 @@ a:visited {
 	text-decoration: none;
 	color: #000;
 }
+
+* {
+	box-sizing: border-box;
+}

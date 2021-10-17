@@ -1,7 +1,3 @@
-// import firebase from 'firebase/app';
-
-// import 'firebase/firestore';
-// import 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
