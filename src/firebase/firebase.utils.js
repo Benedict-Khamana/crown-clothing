@@ -22,22 +22,12 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
     createdAt,
     ...additionalData,
   };
-  console.log('docData:', docData);
+  // console.log('docData:', docData);
   try {
     const userRef = await addDoc(collection(firestore, 'users'), docData);
-    console.log('userRef:', userRef);
+    // console.log('userRef:', userRef);
 
-    console.log('Document written with ID: ', userRef.id);
-
-    //GET DATA => DocumentSnapshot<any>
-    // const docSnap = await getDoc(userRef);
-
-    // if (docSnap.exists()) {
-    //   console.log('Document data:', docSnap.data());
-    // } else {
-    //   // doc.data() will be undefined in this case
-    //   console.log('No such document!');
-    // }
+    // console.log('Document written with ID: ', userRef.id);
     return userRef;
   } catch (e) {
     console.error('Error adding document: ', e);

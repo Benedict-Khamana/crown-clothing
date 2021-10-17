@@ -26,24 +26,17 @@ class App extends React.Component {
         //GET DATA => DocumentSnapshot<any>
         const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
-          console.log('Document data:', docSnap.data());
-          this.setState(
-            {
-              currentUser: {
-                id: userRef.id,
-                ...docSnap.data(),
-              },
+          // console.log('Document data:', docSnap.data());
+          this.setState({
+            currentUser: {
+              id: userRef.id,
+              ...docSnap.data(),
             },
-            () => {
-              console.log('App state:', this.state);
-            }
-          );
+          });
         } else {
           // doc.data() will be undefined in this case
-          console.log('No such document!');
-          this.setState({ currentUser: userAuth }, () => {
-            console.log('App state:', this.state);
-          });
+          // console.log('No such document!');
+          this.setState({ currentUser: userAuth });
         }
       }
     });
