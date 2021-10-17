@@ -7,6 +7,7 @@ import ShopPage from './pages/shop/shop.component';
 import SignInAndSignUpComponent from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import Header from './components/header/header.component';
 import { auth, createUserProfileDocument } from './firebase/firebase.utils';
+import { getDoc } from '@firebase/firestore';
 
 class App extends React.Component {
   constructor() {
@@ -19,8 +20,32 @@ class App extends React.Component {
   unsubscribeFromAuth = null;
 
   componentDidMount() {
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(async user => {
-      createUserProfileDocument(user);
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+      if (userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
+        //GET DATA => DocumentSnapshot<any>
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          console.log('Document data:', docSnap.data());
+          this.setState(
+            {
+              currentUser: {
+                id: userRef.id,
+                ...docSnap.data(),
+              },
+            },
+            () => {
+              console.log('App state:', this.state);
+            }
+          );
+        } else {
+          // doc.data() will be undefined in this case
+          console.log('No such document!');
+          this.setState({ currentUser: userAuth }, () => {
+            console.log('App state:', this.state);
+          });
+        }
+      }
     });
   }
 

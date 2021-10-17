@@ -1,11 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  addDoc,
-  collection,
-} from 'firebase/firestore';
+import { getFirestore, addDoc, collection } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -19,33 +13,35 @@ const firebaseConfig = {
 
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
-  const userRef = doc(firestore, 'users', 'lwiV01TXqroRGSSGQ8DF');
-  const docSnap = await getDoc(userRef);
-  if (docSnap.exists()) {
-    console.log('Document data:', docSnap.data());
-    console.log('Document snapshop:', docSnap);
-    console.log('docRef:', userRef.firestore);
 
-    const { displayName, email } = userAuth;
-    const createdAt = new Date();
+  const { displayName, email } = userAuth;
+  const createdAt = new Date();
+  const docData = {
+    displayName,
+    email,
+    createdAt,
+    ...additionalData,
+  };
+  console.log('docData:', docData);
+  try {
+    const userRef = await addDoc(collection(firestore, 'users'), docData);
+    console.log('userRef:', userRef);
 
-    const docData = {
-      displayName,
-      email,
-      createdAt,
-      ...additionalData,
-    };
-    console.log(docData);
-    try {
-      await addDoc(collection(firestore, 'users'), docData);
-    } catch (err) {
-      console.log('Error creating user', err.message);
-    }
-  } else {
-    // doc.data() will be undefined in this case
-    console.log('No such document!');
+    console.log('Document written with ID: ', userRef.id);
+
+    //GET DATA => DocumentSnapshot<any>
+    // const docSnap = await getDoc(userRef);
+
+    // if (docSnap.exists()) {
+    //   console.log('Document data:', docSnap.data());
+    // } else {
+    //   // doc.data() will be undefined in this case
+    //   console.log('No such document!');
+    // }
+    return userRef;
+  } catch (e) {
+    console.error('Error adding document: ', e);
   }
-  return userRef;
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
