@@ -1,5 +1,13 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, addDoc, collection } from 'firebase/firestore';
+import {
+  getFirestore,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  getDocs,
+} from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -14,24 +22,53 @@ const firebaseConfig = {
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
 
-  const { displayName, email } = userAuth;
-  const createdAt = new Date();
-  const docData = {
-    displayName,
-    email,
-    createdAt,
-    ...additionalData,
-  };
-  // console.log('docData:', docData);
-  try {
-    const userRef = await addDoc(collection(firestore, 'users'), docData);
-    // console.log('userRef:', userRef);
+  // console.log('createUserProfileDocument => userAuth.uid', userAuth.uid);
 
-    // console.log('Document written with ID: ', userRef.id);
-    return userRef;
-  } catch (e) {
-    console.error('Error adding document: ', e);
+  const userRef = doc(firestore, 'users', userAuth.uid);
+  const userSnapShot = await getDoc(userRef);
+
+  // const userCollectionRef = collection(firestore, 'users');
+  // const userCollectionSnapShot = await getDocs(userCollectionRef);
+  // console.log({
+  //   collections: userCollectionSnapShot.docs.map(doc => doc.data()),
+  // });
+
+  if (!userSnapShot.exists()) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+    const userDocData = {
+      displayName,
+      email,
+      createdAt,
+      ...additionalData,
+    };
+
+    try {
+      await setDoc(userRef, userDocData);
+    } catch (e) {
+      console.error('Error creating user: ', e);
+    }
   }
+  return userRef;
+
+  // const { displayName, email } = userAuth;
+  // const createdAt = new Date();
+  // const docData = {
+  //   displayName,
+  //   email,
+  //   createdAt,
+  //   ...additionalData,
+  // };
+  // // console.log('docData:', docData);
+  // try {
+  //   const userRef = await addDoc(collection(firestore, 'users'), docData);
+  //   // console.log('userRef:', userRef);
+
+  //   // console.log('Document written with ID: ', userRef.id);
+  //   return userRef;
+  // } catch (e) {
+  //   console.error('Error adding document: ', e);
+  // }
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
