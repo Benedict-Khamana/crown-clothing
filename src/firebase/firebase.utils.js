@@ -7,6 +7,7 @@ import {
   getDoc,
   setDoc,
   getDocs,
+  writeBatch,
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
@@ -69,6 +70,24 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
   // } catch (e) {
   //   console.error('Error adding document: ', e);
   // }
+};
+
+export const addCollectionAndDocuments = async (
+  collectionKey,
+  objectsToAdd
+) => {
+  const collectionRef = collection(firestore, collectionKey);
+  console.log(collectionRef);
+
+  //? Creates a write batch, used for performing multiple writes as a single atomic operation
+  const batch = writeBatch(firestore);
+  objectsToAdd.forEach(obj => {
+    const newDocRef = doc(collectionRef);
+    // console.log(newDocRef);
+    batch.set(newDocRef, obj);
+  });
+
+  return await batch.commit();
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
