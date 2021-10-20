@@ -1,12 +1,10 @@
 import { initializeApp } from 'firebase/app';
 import {
   getFirestore,
-  addDoc,
   collection,
   doc,
   getDoc,
   setDoc,
-  getDocs,
   writeBatch,
 } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -23,16 +21,8 @@ const firebaseConfig = {
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
 
-  // console.log('createUserProfileDocument => userAuth.uid', userAuth.uid);
-
   const userRef = doc(firestore, 'users', userAuth.uid);
   const userSnapShot = await getDoc(userRef);
-
-  // const userCollectionRef = collection(firestore, 'users');
-  // const userCollectionSnapShot = await getDocs(userCollectionRef);
-  // console.log({
-  //   collections: userCollectionSnapShot.docs.map(doc => doc.data()),
-  // });
 
   if (!userSnapShot.exists()) {
     const { displayName, email } = userAuth;
@@ -51,25 +41,6 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
     }
   }
   return userRef;
-
-  // const { displayName, email } = userAuth;
-  // const createdAt = new Date();
-  // const docData = {
-  //   displayName,
-  //   email,
-  //   createdAt,
-  //   ...additionalData,
-  // };
-  // // console.log('docData:', docData);
-  // try {
-  //   const userRef = await addDoc(collection(firestore, 'users'), docData);
-  //   // console.log('userRef:', userRef);
-
-  //   // console.log('Document written with ID: ', userRef.id);
-  //   return userRef;
-  // } catch (e) {
-  //   console.error('Error adding document: ', e);
-  // }
 };
 
 export const addCollectionAndDocuments = async (
@@ -91,17 +62,20 @@ export const addCollectionAndDocuments = async (
 };
 
 export const convertCollectionSnapshopToMap = collections => {
-  const transformedCollection = collections.docs.map(doc => {
+  const transformedCollections = collections.docs.map(doc => {
     const { title, items } = doc.data();
 
     return {
-      routeName: encodeURI(title.toLowerCase()),
       id: doc.id,
       title,
+      routeName: encodeURI(title.toLowerCase()),
       items,
     };
   });
-  console.log(transformedCollection);
+  return transformedCollections.reduce((accumalator, collection) => {
+    accumalator[collection.title.toLowerCase()] = collection;
+    return accumalator;
+  }, {});
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
