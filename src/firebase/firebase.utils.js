@@ -48,7 +48,7 @@ export const addCollectionAndDocuments = async (
   objectsToAdd
 ) => {
   const collectionRef = collection(firestore, collectionKey);
-  console.log(collectionRef);
+  // console.log(collectionRef);
 
   //? Creates a write batch, used for performing multiple writes as a single atomic operation
   const batch = writeBatch(firestore);
