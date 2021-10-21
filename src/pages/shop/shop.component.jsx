@@ -2,7 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { collection, onSnapshot } from '@firebase/firestore';
+import { collection, getDocs, onSnapshot } from '@firebase/firestore';
 import {
   firestore,
   convertCollectionSnapshopToMap,
@@ -23,16 +23,32 @@ class ShopPage extends React.Component {
   };
 
   unsubscribeFromSnapshot = null;
-
+  // https://firestore.googleapis.com/v1/projects/crown-clothing-d09fb
+  // /databases/(default)/documents/
   componentDidMount() {
     const { updateCollections } = this.props;
     const collectionRef = collection(firestore, 'collections');
 
-    this.unsubscribeFromSnapshot = onSnapshot(collectionRef, async snapshot => {
+    //? WITH fetch
+    // fetch(
+    //   'https://firestore.googleapis.com/v1/projects/crown-clothing-d09fb/databases/(default)/documents/collections'
+    // )
+    //   .then(response => response.json())
+    //   .then(collections => console.log(collections));
+
+    //? WITH getDocs
+    getDocs(collectionRef).then(snapshot => {
       const collectionsMap = convertCollectionSnapshopToMap(snapshot);
       updateCollections(collectionsMap);
       this.setState({ loading: false });
     });
+
+    //? WITH onSnapshot
+    // this.unsubscribeFromSnapshot = onSnapshot(collectionRef, async snapshot => {
+    //   const collectionsMap = convertCollectionSnapshopToMap(snapshot);
+    //   updateCollections(collectionsMap);
+    //   this.setState({ loading: false });
+    // });
   }
 
   render() {
