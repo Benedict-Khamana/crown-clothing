@@ -1,5 +1,12 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, addDoc, collection } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  writeBatch,
+} from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -14,24 +21,61 @@ const firebaseConfig = {
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
 
-  const { displayName, email } = userAuth;
-  const createdAt = new Date();
-  const docData = {
-    displayName,
-    email,
-    createdAt,
-    ...additionalData,
-  };
-  // console.log('docData:', docData);
-  try {
-    const userRef = await addDoc(collection(firestore, 'users'), docData);
-    // console.log('userRef:', userRef);
+  const userRef = doc(firestore, 'users', userAuth.uid);
+  const userSnapShot = await getDoc(userRef);
 
-    // console.log('Document written with ID: ', userRef.id);
-    return userRef;
-  } catch (e) {
-    console.error('Error adding document: ', e);
+  if (!userSnapShot.exists()) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+    const userDocData = {
+      displayName,
+      email,
+      createdAt,
+      ...additionalData,
+    };
+
+    try {
+      await setDoc(userRef, userDocData);
+    } catch (e) {
+      console.error('Error creating user: ', e);
+    }
   }
+  return userRef;
+};
+
+export const addCollectionAndDocuments = async (
+  collectionKey,
+  objectsToAdd
+) => {
+  const collectionRef = collection(firestore, collectionKey);
+  // console.log(collectionRef);
+
+  //? Creates a write batch, used for performing multiple writes as a single atomic operation
+  const batch = writeBatch(firestore);
+  objectsToAdd.forEach(obj => {
+    const newDocRef = doc(collectionRef);
+    // console.log(newDocRef);
+    batch.set(newDocRef, obj);
+  });
+
+  return await batch.commit();
+};
+
+export const convertCollectionSnapshopToMap = collections => {
+  const transformedCollections = collections.docs.map(doc => {
+    const { title, items } = doc.data();
+
+    return {
+      id: doc.id,
+      title,
+      routeName: encodeURI(title.toLowerCase()),
+      items,
+    };
+  });
+  return transformedCollections.reduce((accumalator, collection) => {
+    accumalator[collection.title.toLowerCase()] = collection;
+    return accumalator;
+  }, {});
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
