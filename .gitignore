@@ -24,3 +24,4 @@ yarn-error.log*
 
 .vscode
 favicon_package_v0.16.zip
+desktop.files.json
